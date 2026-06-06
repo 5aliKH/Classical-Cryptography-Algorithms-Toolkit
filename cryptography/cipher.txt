@@ -1,0 +1,273 @@
+# خوارزمية قيصر
+def encrypt_caesar(input_text, offset):
+    encrypted_result = ""  # سلسلة لتخزين النص المشفر
+    for character in input_text:  # المرور على كل حرف في النص
+        if character.isalpha():  # التحقق إذا كان الحرف حرفًا
+            base = ord('A') if character.isupper() else ord('a')  # تحديد الأساس
+            # حساب الحرف المشفر
+            encrypted_result += chr((ord(character) - base + offset) % 26 + base)
+        else:
+            encrypted_result += character  # إضافة الحرف كما هو
+    return encrypted_result  # إرجاع النص المشفر
+
+def decrypt_caesar(input_text, offset):
+    return encrypt_caesar(input_text, -offset)  # فك التشفير باستخدام الإزاحة السلبية
+
+# الحصول على نص المستخدم ومفتاح الإزاحة
+user_text = input("أدخل النص المراد تشفيره: ")
+user_shift = int(input("أدخل رقم المفتاح (الإزاحة): "))
+
+# تشفير النص
+ciphered_text = encrypt_caesar(user_text, user_shift)
+print("النص المشفر:", ciphered_text)
+
+# فك تشفير النص
+deciphered_text = decrypt_caesar(ciphered_text, user_shift)
+print("النص المفكوك:", deciphered_text)
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+
+
+import math
+
+# دالة لتشفير النص باستخدام خوارزمية النقل العمودي
+def encode_text(plain_text, key_length):
+    # حساب عدد الأعمدة (طول المفتاح)
+    num_cols = key_length
+    
+    # حساب عدد الصفوف عن طريق تقسيم طول النص على عدد الأعمدة
+    num_rows = math.ceil(len(plain_text) / num_cols)
+    
+    # إعداد مصفوفة فارغة لكل عمود
+    columns = [''] * num_cols
+    
+    # إدخال النص في الأعمدة
+    for idx, char in enumerate(plain_text):
+        col = idx % num_cols
+        columns[col] += char
+    
+    # دمج الأعمدة للحصول على النص المشفر
+    encoded_text = ''.join(columns)
+    
+    return encoded_text
+
+# دالة لفك تشفير النص باستخدام خوارزمية النقل العمودي
+def decode_text(encoded_text, key_length):
+    num_cols = key_length
+    num_rows = math.ceil(len(encoded_text) / num_cols)
+    empty_cells = (num_cols * num_rows) - len(encoded_text)
+    
+    # إعداد مصفوفة فارغة لكل عمود
+    columns = [''] * num_cols
+    col = 0
+    row = 0
+    
+    # ملء الأعمدة بالنص المشفر
+    for char in encoded_text:
+        columns[col] += char
+        col += 1
+        
+        if col == num_cols or (col == num_cols - empty_cells and row >= num_rows - 1):
+            col = 0
+            row += 1
+    
+    # استعادة النص الأصلي من المصفوفة
+    decoded_text = ''
+    
+    for r in range(num_rows):
+        for c in range(num_cols):
+            if len(columns[c]) > r:
+                decoded_text += columns[c][r]
+    
+    return decoded_text
+
+# المدخلات من المستخدم
+input_text = input("أدخل النص المراد تشفيره: ").replace(" ", "")
+key_height = int(input("أدخل عدد الأعمدة (المفتاح): "))
+
+# تشفير النص
+ciphered_text = encode_text(input_text, key_height)
+print("النص المشفر:", ciphered_text)
+
+# فك التشفير
+recovered_text = decode_text(ciphered_text, key_height)
+print("النص المفكوك:", recovered_text)
+
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+# خوارزمية المفتاح التلقائي
+# تحويل الحروف إلى أرقام والعكس (A=0, B=1, ..., Z=25)
+def letter_to_number(letter):
+    return ord(letter) - ord('A')
+
+# تحويل الرقم إلى حرف
+def number_to_letter(number):
+    return chr(number + ord('A'))
+
+# تمديد المفتاح باستخدام النص الأصلي
+def expand_key(initial_key, input_text):
+    expanded_key = initial_key + input_text[:len(input_text) - len(initial_key)]
+    return expanded_key.upper()
+
+# تشفير النص باستخدام خوارزمية المفتاح التلقائي
+def auto_key_encrypt(input_text, initial_key):
+    input_text = input_text.upper()
+    key = expand_key(initial_key, input_text)
+    
+    encrypted_output = ""
+    for i in range(len(input_text)):
+        # حساب الحرف المشفر (إضافة القيمة العددية للحرف والنص معاً)
+        encrypted_char = (letter_to_number(input_text[i]) + letter_to_number(key[i])) % 26
+        encrypted_output += number_to_letter(encrypted_char)
+    
+    return encrypted_output
+
+# فك التشفير باستخدام خوارزمية المفتاح التلقائي
+def auto_key_decrypt(encrypted_text, initial_key):
+    encrypted_text = encrypted_text.upper()
+    key = initial_key.upper()
+    # إنشاء سلسلة فارغة لتخزين النص المفكوك
+    decrypted_output = ""
+    
+    for i in range(len(encrypted_text)):
+        # حساب الحرف المفكوك (طرح قيمة الحرف المشفر من المفتاح)
+        decrypted_char = (letter_to_number(encrypted_text[i]) - letter_to_number(key[i])) % 26
+        decrypted_output += number_to_letter(decrypted_char)
+        # تمديد المفتاح باستخدام الحروف المفكوكة
+        key += decrypted_output[-1]
+    
+    return decrypted_output
+
+# الحصول على النص والمفتاح من المستخدم
+input_text = input("أدخل النص المراد تشفيره: ").upper()
+initial_key = input("أدخل المفتاح: ").upper()
+
+# تشفير النص
+ciphered_text = auto_key_encrypt(input_text, initial_key)
+print("النص المشفر:", ciphered_text)
+
+# فك تشفير النص
+deciphered_text = auto_key_decrypt(ciphered_text, initial_key)
+print("النص المفكوك:", deciphered_text)
+000000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+# مكتبة العمليات العددية والتعامل مع المصفوفات
+import numpy as np
+
+# تحويل الحروف إلى أرقام والعكس (A=0, B=1, ..., Z=25)
+def letter_to_number(letter):
+    return ord(letter) - ord('A')
+
+def number_to_letter(number):
+    return chr(number + ord('A'))
+
+# دالة لتحويل كلمة المفتاح إلى مصفوفة 2x2
+def key_string_to_matrix(key_string):
+    key_string = key_string.upper()
+    if len(key_string) != 4:
+        raise ValueError("يجب أن تتكون كلمة المفتاح من 4 أحرف.")
+    
+    key_nums = [letter_to_number(c) for c in key_string]
+    key_matrix = np.array([[key_nums[0], key_nums[1]], [key_nums[2], key_nums[3]]])
+    return key_matrix
+
+# دالة لحساب معكوس المصفوفة في الحقل Z26
+def inverse_matrix(matrix, mod=26):
+    determinant = int(np.round(np.linalg.det(matrix)))  # حساب محدد المصفوفة
+    determinant_inv = pow(determinant, -1, mod)  # حساب معكوس المحدد
+    matrix_inv_mod = (determinant_inv * np.round(determinant * np.linalg.inv(matrix)).astype(int)) % mod
+    return matrix_inv_mod
+
+# تشفير النص باستخدام خوارزمية هيل
+def encrypt_hill(input_text, key_matrix):
+    block_size = key_matrix.shape[0]
+    blocks = [input_text[i:i+block_size] for i in range(0, len(input_text), block_size)]
+    
+    encrypted_output = ""
+    for block in blocks:
+        block_vector = np.array([letter_to_number(c) for c in block])
+        encrypted_vector = np.dot(key_matrix, block_vector) % 26
+        encrypted_output += ''.join(number_to_letter(int(c)) for c in encrypted_vector)
+    return encrypted_output
+
+# فك التشفير باستخدام خوارزمية هيل
+def decrypt_hill(encrypted_text, key_matrix):
+    inv_key_matrix = inverse_matrix(key_matrix)
+    
+    block_size = key_matrix.shape[0]
+    blocks = [encrypted_text[i:i+block_size] for i in range(0, len(encrypted_text), block_size)]
+    
+    decrypted_output = ""
+    for block in blocks:
+        block_vector = np.array([letter_to_number(c) for c in block])
+        decrypted_vector = np.dot(inv_key_matrix, block_vector) % 26
+        decrypted_output += ''.join(number_to_letter(int(c)) for c in decrypted_vector)
+    return decrypted_output
+
+# عرض الخيارات للمستخدم لاختيار كلمة مفتاح
+def choose_key_from_options():
+    available_keys = {
+        "hill": "HILL",
+        "zirp": "ZIRP",
+        "urll": "URLL",  # أمثلة أخرى
+        "test": "TEST",
+        "neop": "NEOP"
+    }
+    
+    print("اختر كلمة مفتاح من الخيارات التالية:")
+    for index, (key_name, key_word) in enumerate(available_keys.items(), 1):
+        print(f"{index}. {key_name} ({key_word})")
+    
+    user_choice = int(input("أدخل رقم الاختيار: "))
+    selected_key_word = list(available_keys.values())[user_choice - 1]
+    
+    return key_string_to_matrix(selected_key_word)
+
+# الحصول على النص من المستخدم (يجب أن يكون 4 أحرف فقط)
+user_input_text = input("أدخل النص المراد تشفيره (4 أحرف فقط): ").upper()
+
+if len(user_input_text) != 4:
+    print("يجب إدخال 4 أحرف بالضبط.")
+else:
+    key_matrix = choose_key_from_options()
+
+    # التأكد من أن المصفوفة لها محدد غير صفري
+    if int(np.round(np.linalg.det(key_matrix))) % 26 == 0:
+        print("المفتاح غير صالح. يجب ألا يكون محدد المصفوفة صفريًا.")
+    else:
+        # تشفير النص
+        encrypted_result = encrypt_hill(user_input_text, key_matrix)
+        print("النص المشفر:", encrypted_result)
+
+        # فك التشفير
+        decrypted_result = decrypt_hill(encrypted_result, key_matrix)
+        print("النص المفكوك:", decrypted_result)
+
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000
+
+
+# خوارزمية أتباش
+def atbash_transform(input_string):
+    output_string = ""  # سلسلة فارغة لتخزين النص الناتج
+    for letter in input_string:  # المرور على كل حرف في النص
+        if letter.isalpha():  # التحقق مما إذا كان الحرف حرفًا
+            # حساب الحرف الناتج باستخدام صيغة أتباش
+            # 'A' -> 'Z', 'B' -> 'Y', ... , 'a' -> 'z', 'b' -> 'y'
+            if letter.isupper():
+                output_string += chr(ord('Z') - (ord(letter) - ord('A')))
+            else:
+                output_string += chr(ord('z') - (ord(letter) - ord('a')))
+        else:
+            output_string += letter  # إضافة الحرف كما هو إذا لم يكن حرفًا
+    return output_string  # إرجاع النص الناتج
+
+# الحصول على نص المستخدم
+user_input = input("أدخل النص المراد تحويله: ")
+
+# تحويل النص
+transformed_text = atbash_transform(user_input)
+print("النص المحول:", transformed_text)
+
+# فك التحويل (أتباش هو متماثل، لذا نستخدم نفس الدالة)
+original_text = atbash_transform(transformed_text)
+print("النص الأصلي:", original_text)
